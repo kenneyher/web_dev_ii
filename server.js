@@ -1,46 +1,104 @@
 const express = require("express");
+const fs = require("node:fs");
+
+
 const app = express();
-const port = 8080;
+const PORT = 9000;
+const filePath = "./products.json";
 
-const products = [
-  { id: 1, name: "Wireless Headphones", price: 99.99, category: "Electronics" },
-  { id: 2, name: "Smart Watch", price: 149.99, category: "Electronics" },
-  { id: 3, name: "Gaming Mouse", price: 49.99, category: "Accessories" },
-  { id: 4, name: "Mechanical Keyboard", price: 89.99, category: "Accessories" },
-  { id: 5, name: "USB-C Hub", price: 39.99, category: "Accessories" },
-  { id: 6, name: "4K Monitor", price: 299.99, category: "Electronics" },
-  { id: 7, name: "Laptop Stand", price: 29.99, category: "Office" },
-  { id: 8, name: "Bluetooth Speaker", price: 59.99, category: "Audio" },
-  { id: 9, name: "Noise Cancelling Earbuds", price: 129.99, category: "Audio" },
-  { id: 10, name: "Webcam", price: 69.99, category: "Electronics" },
-  { id: 11, name: "External SSD 1TB", price: 159.99, category: "Storage" },
-  { id: 12, name: "Portable Charger", price: 34.99, category: "Power" },
-  { id: 13, name: "Desk Lamp", price: 24.99, category: "Office" },
-  { id: 14, name: "Ergonomic Chair", price: 199.99, category: "Furniture" },
-  { id: 15, name: "Standing Desk", price: 399.99, category: "Furniture" },
-  { id: 16, name: "Action Camera", price: 249.99, category: "Photography" },
-  { id: 17, name: "Tripod", price: 44.99, category: "Photography" },
-  { id: 18, name: "Smart Light Bulb", price: 19.99, category: "Smart Home" },
-  { id: 19, name: "Wi-Fi Router", price: 129.99, category: "Networking" },
-  { id: 20, name: "VR Headset", price: 349.99, category: "Gaming" }
-];
+function hasContent(str) {
+  return typeof str == "string" && str.trim();
+}
 
-app.get('/products', (req, res) => {
+function appendToJSON(data) {
+  const jsonLine = JSON.stringify(data) + "\n";
+  fs.appendFile(filePath, jsonLine, (err) => {
+    if (err) throw err;
+    console.log("Failed to append data to JSON:", data);
+  });
+}
+
+app.use(express.json());
+app.use(express.urlencoded());
+
+app.route("/products").get((req, res) => {
+  let { count, products } = JSON.parse(
+    fs.readFileSync("./products.json", "utf-8"),
+  );
+
+
+  if (req.query.category) {
+    const category = req.query.category;
+    products = products.filter(
+      (product) => product.category.toLowerCase() === category.toLowerCase(),
+    );
+  }
+
+
+  if (req.query.subcategory) {
+    const subcategory = req.query.subcategory;
+    products = products.filter(
+      (product) =>
+        product.subcategory.toLowerCase() === subcategory.toLowerCase(),
+    );
+  }
+
+
+  if (req.query.search) {
+    const search = req.query.search.toLowerCase();
+    products = products.filter((product) =>
+      product.name.toLowerCase().includes(search),
+    );
+  }
+
   res.json(products);
-});
+})
+  .post((req, res) => {
+    const { name, category, subcategory, currency, price, stock, rating } = req.body;
+    let newProduct = {
+      id: generateID()
+    };
+    let errors = {};
+    let { count } = JSON.parse(
+      fs.readFileSync("./products.json", "utf-8"),
+    );
 
-app.post("/products", (req, res) => {
-  res.json(products);
-});
+    const id = 2000 + count + 1;
+
+    if (!hasContent(name)) {
+      errors.name = "Name must not be empty!"
+    }
+    if (!hasContent(category)) {
+      errors.category = "Category must not be empty!"
+    }
+    if (!hasContent(subcategory)) {
+      errors.category = "Category must not be empty!"
+    }
+    if (!hasContent(currency)) {
+      errors.category = "Category must not be empty!"
+    }
+    if (!Number.isNaN(price) || price < 0) {
+      errors.price = "Price must be a positive integer!"
+    }
+    if (!Number.isNaN(stock) || price < 0) {
+      errors.price = "Stock must be a positive integer!"
+    }
+    if (!Number.isNaN(rating) || rating < 0 || rating > 5) {
+      errors.price = "Rating must be a positive integer between 0 and 5!"
+    }
+
+    if (errors) {
+      res.statusCode = 400;
+      res.json({
+        product: {
+          name, category, subcategory, price, stock, rating, currency
+        },
+        errors
+      })
+    }
+  })
 
 
-app.delete("/products", (req, res) => {
-  res.json(products);
-});
-app.put("/products", (req, res) => {
-  res.json(products);
-});
-
-app.listen(port, () => {
-  console.log(`Server listening on localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
