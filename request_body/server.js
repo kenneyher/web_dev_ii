@@ -26,9 +26,7 @@ app.use(express.urlencoded());
 app
   .route("/products")
   .get((req, res) => {
-    let { count, products } = JSON.parse(
-      fs.readFileSync(filePath, "utf-8"),
-    );
+    let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
     if (req.query.category) {
       const category = req.query.category;
@@ -55,42 +53,32 @@ app
     res.json(products);
   })
   .post((req, res) => {
-    let { count } = JSON.parse(
-      fs.readFileSync(filePath, "utf-8"),
-    );
+    let { count } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
     const { name, category, subcategory, currency, price, stock, rating } =
       req.body;
     let newProduct = {
       id: 2000 + count,
     };
-    let errors = {};
+    const errors = {};
 
-    if (!hasContent(name)) {
-      errors.name = "Name must not be empty!";
-    }
-    if (!hasContent(category)) {
-      errors.category = "Category must not be empty!";
-    }
-    if (!hasContent(subcategory)) {
-      errors.subcategory = "Subcategory must not be empty!";
-    }
-    if (!hasContent(currency)) {
-      errors.currency = "Currency must not be empty!";
-    }
-    if (Number.isNaN(price) || price < 0) {
-      errors.price = "Price must be a positive integer!";
-    }
-    if (Number.isNaN(stock) || price < 0) {
-      errors.stock = "Stock must be a positive integer!";
-    }
-    if (Number.isNaN(rating) || rating < 0 || rating > 5) {
-      errors.rating = "Rating must be a positive integer between 0 and 5!";
-    }
+    // Validation
+    if (!hasContent(name)) errors.name = "Name is required.";
+    if (!hasContent(category)) errors.category = "Category is required.";
+    if (!hasContent(subcategory))
+      errors.subcategory = "Subcategory is required.";
+    if (!hasContent(currency)) errors.currency = "Currency is required.";
+
+    // Improved number validation
+    if (isNaN(price) || price < 0)
+      errors.price = "Price must be a positive number.";
+    if (isNaN(stock) || stock < 0)
+      errors.stock = "Stock must be a positive number.";
+    if (isNaN(rating) || rating < 0 || rating > 5)
+      errors.rating = "Rating must be between 0 and 5.";
 
     if (Object.keys(errors).length > 0) {
-      res.statusCode = 400;
-      res.json({
-        product: {
+      return res.status(400).json({
+        received: {
           name,
           category,
           subcategory,
@@ -115,7 +103,8 @@ app
       appendToJSON(newProduct);
       res.statusCode = 201;
       res.json({
-        product: newProduct,
+        msg: "Product created successfully.",
+        productId: newProduct.id,
       });
     }
   });
