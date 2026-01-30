@@ -107,7 +107,38 @@ app
         productId: newProduct.id,
       });
     }
-  });
+  })
+
+app.put('/products/:id', (req, res) => {
+  const productId = parseInt(req.params.id, 10);
+  let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  const productIndex = products.findIndex(p => p.id === productId);
+
+  if (productIndex === -1) {
+    return res.status(404).json({ error: "Product not found." });
+  }
+
+  const { name, category, subcategory, currency, price, stock, rating } = req.body;
+
+  const updatedProduct = {
+    ...products[productIndex],
+    name, 
+    category,
+    subcategory,
+    currency,
+    price: Number(price),
+    stock: Number(stock),
+    rating: Number(rating)
+  };
+
+  products[productIndex] = updatedProduct;
+  fs.writeFileSync(
+    filePath,
+    JSON.stringify({ count, products }, null, 2),
+    "utf-8",
+  );
+  res.json({ msg: "Product updated successfully." });
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

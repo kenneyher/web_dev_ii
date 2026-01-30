@@ -1,5 +1,5 @@
 {
-  "count": 503,
+  "count": 504,
   "products": [
     {
       "id": 1001,
@@ -5017,6 +5017,16 @@
       "category": "Electronics",
       "subcategory": "Laptops",
       "price": 800,
+      "stock": 6,
+      "rating": 3.8,
+      "currency": "USD"
+    },
+    {
+      "id": 2503,
+      "name": "Lenovo Legion",
+      "category": "Electronics",
+      "subcategory": "Laptops",
+      "price": 1200,
       "stock": 6,
       "rating": 3.8,
       "currency": "USD"
