@@ -1,16 +1,6 @@
 {
-  "count": 504,
+  "count": 505,
   "products": [
-    {
-      "id": 1001,
-      "name": "Vintage Hat 641",
-      "category": "Apparel",
-      "subcategory": "Hat",
-      "price": 299.99,
-      "currency": "USD",
-      "stock": 105,
-      "rating": 4.8
-    },
     {
       "id": 1002,
       "name": "Wireless Dumbbells 405",
@@ -5024,6 +5014,16 @@
     {
       "id": 2503,
       "name": "Lenovo Legion",
+      "category": "Electronics",
+      "subcategory": "Laptops",
+      "price": 1200,
+      "stock": 6,
+      "rating": 3.8,
+      "currency": "USD"
+    },
+    {
+      "id": 2504,
+      "name": "Lenovo Legion X",
       "category": "Electronics",
       "subcategory": "Laptops",
       "price": 1200,
