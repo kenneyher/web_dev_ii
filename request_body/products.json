@@ -1,5 +1,5 @@
 {
-  "count": 505,
+  "count": 506,
   "products": [
     {
       "id": 1002,
@@ -5012,8 +5012,8 @@
       "currency": "USD"
     },
     {
-      "id": 2503,
-      "name": "Lenovo Legion",
+      "id": 2504,
+      "name": "Lenovo Legion X",
       "category": "Electronics",
       "subcategory": "Laptops",
       "price": 1200,
@@ -5022,10 +5022,20 @@
       "currency": "USD"
     },
     {
-      "id": 2504,
-      "name": "Lenovo Legion X",
+      "id": 2505,
+      "name": "Lenovo Legion",
       "category": "Electronics",
-      "subcategory": "Laptops",
+      "subcategory": "Laptop",
+      "price": 1200,
+      "stock": 6,
+      "rating": 3.8,
+      "currency": "USD"
+    },
+    {
+      "id": 2506,
+      "name": "Lenovo Legion",
+      "category": "Electronics",
+      "subcategory": "Laptop",
       "price": 1200,
       "stock": 6,
       "rating": 3.8,

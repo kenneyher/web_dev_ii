@@ -1,16 +1,42 @@
 const express = require("express");
 const fs = require("node:fs");
+const path = require("node:path");
 
 const app = express();
 const PORT = 9000;
-const filePath = "./products.json";
+const filePath = path.join(__dirname, "products.json");
+
+/**
+ * ------------------------------------------------------------------------------
+ * Middleware and Helper Functions
+ * ------------------------------------------------------------------------------
+ */
+
+const db = {
+  read: () => {
+    try {
+      const data = fs.readFileSync(filePath, "utf-8");
+      return JSON.parse(data);
+    } catch (err) {
+      console.error("Error reading database file:", err);
+      return { count: 0, products: [] };
+    }
+  }, 
+  write: (data) => {
+    try {
+      fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
+    } catch (err) {
+      console.error("Error writing database file:", err);
+    }
+  }
+}
 
 function hasContent(str) {
   return typeof str == "string" && str.trim();
 }
 
 function checkProductExists(req, res, next) {
-  let { products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let { products } = db.read();
   const productId = parseInt(req.params.id, 10);
   const product = products.find((p) => p.id === productId);
 
@@ -52,7 +78,7 @@ function validateProduct(req, res, next) {
       errors,
     });
   } else {
-    req.product = {
+    req.validProduct = {
       name,
       category,
       subcategory,
@@ -66,14 +92,10 @@ function validateProduct(req, res, next) {
 }
 
 function appendToJSON(newProduct) {
-  let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let { count, products } = db.read();
   products.push(newProduct);
   count += 1;
-  fs.writeFileSync(
-    filePath,
-    JSON.stringify({ count, products }, null, 2),
-    "utf-8",
-  );
+  db.write({ count, products });
 }
 
 app.use(express.json());
@@ -82,7 +104,7 @@ app.use(express.urlencoded());
 app
   .route("/products")
   .get((req, res) => {
-    let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    let { count, products } = db.read();
 
     if (req.query.category) {
       const category = req.query.category;
@@ -109,14 +131,14 @@ app
     res.json(products);
   })
   .post(validateProduct, (req, res) => {
-    let { count } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    let { count } = db.read();
     let newProduct = {
       id: 2000 + count,
     };
 
     newProduct = {
       ...newProduct,
-      ...req.product,
+      ...req.validProduct,
     };
     appendToJSON(newProduct);
     res.statusCode = 201;
@@ -128,35 +150,27 @@ app
 
 app.put("/products/:id", checkProductExists, validateProduct, (req, res) => {
   const productId = parseInt(req.params.id, 10);
-  let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let { count, products } = db.read();
   const productIndex = products.findIndex((p) => p.id === productId);
 
   const updatedProduct = {
     ...products[productIndex],
-    ...req.product,
+    ...req.validProduct,
   };
 
   products[productIndex] = updatedProduct;
-  fs.writeFileSync(
-    filePath,
-    JSON.stringify({ count, products }, null, 2),
-    "utf-8",
-  );
+  db.write({ count, products });  
   res.json({ msg: "Product updated successfully." });
 });
 
 app.delete("/products/:id", checkProductExists, (req, res) => {
   const productId = parseInt(req.params.id, 10);
-  let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let { count, products } = db.read();
   products = products.filter((p) => p.id !== productId);
   count -= 1;
 
-  fs.writeFileSync(
-    filePath,
-    JSON.stringify({ count, products }, null, 2),
-    "utf-8",
-  );
-  res.status(204);
+  db.write({ count, products });
+  res.status(204).end();
 });
 
 app.get("/products/:id", checkProductExists, (req, res) => {
