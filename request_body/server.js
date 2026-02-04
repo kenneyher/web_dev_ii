@@ -9,6 +9,13 @@ function hasContent(str) {
   return typeof str == "string" && str.trim();
 }
 
+function productExists(productId) {
+  const { products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  let target = products.find((p) => p.id == productId);
+
+  return target !== undefined;
+}
+
 function appendToJSON(newProduct) {
   let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   products.push(newProduct);
@@ -109,7 +116,12 @@ app
     }
   })
 
-app.put('/products/:id', (req, res) => {
+app.put('/products/:id', (req, res, next) => {
+  const productId = parseInt(req.params.id, 10);
+  
+  if (productExists(productId)) next('route')
+  else res.status(404).json({msg: "error 404"});
+}, (req, res) => {
   const productId = parseInt(req.params.id, 10);
   let { count, products } = JSON.parse(fs.readFileSync(filePath, "utf-8"));
   const productIndex = products.findIndex(p => p.id === productId);
