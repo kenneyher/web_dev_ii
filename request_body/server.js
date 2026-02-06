@@ -1,10 +1,22 @@
 const express = require("express");
 const fs = require("node:fs");
 const path = require("node:path");
+const { Sequelize } = require("sequelize");
 
 const app = express();
 const PORT = 9000;
 const filePath = path.join(__dirname, "products.json");
+
+const conn = new Sequelize("product_inventory", "root", "root", {
+  host: "localhost",
+  dialect: "mysql"
+});
+
+conn.authenticate().then(() => {
+  console.log("Database connection established successfully.");
+}).catch((err) => {
+  console.error("Unable to connect to the database:", err);
+});
 
 /**
  * ------------------------------------------------------------------------------
