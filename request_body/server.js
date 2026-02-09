@@ -1,7 +1,7 @@
 const express = require("express");
 const fs = require("node:fs");
 const path = require("node:path");
-const { Sequelize } = require("sequelize");
+const { Sequelize, DataTypes } = require("sequelize");
 
 const app = express();
 const PORT = 9000;
@@ -12,10 +12,57 @@ const conn = new Sequelize("product_inventory", "root", "root", {
   dialect: "mysql"
 });
 
-conn.authenticate().then(() => {
-  console.log("Database connection established successfully.");
+// conn.authenticate().then(() => {
+//   console.log("Database connection established successfully.");
+// }).catch((err) => {
+//   console.error("Unable to connect to the database:", err);
+// });
+
+const Category = conn.define("Category", {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  }
+});
+
+const Product = conn.define("Product", {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  price: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  stock: {
+    type: DataTypes.INTEGER,
+    allowNull: false
+  },
+  rating: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  currency: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  categoryId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: "Categories",
+      key: "id"
+    }
+  }
+});
+
+Product.belongsTo(Category, { foreignKey: "categoryId" });
+Category.hasMany(Product, { foreignKey: "categoryId" });
+
+conn.sync({ force: true }).then(() => {
+  console.log("Database & tables created!");
 }).catch((err) => {
-  console.error("Unable to connect to the database:", err);
+  console.error("Error syncing database:", err);
 });
 
 /**
