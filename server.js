@@ -31,20 +31,25 @@ const Product = conn.define("Product", {
     allowNull: false
   },
   price: {
-    type: DataTypes.FLOAT,
-    allowNull: false
+    type: DataTypes.DOUBLE.UNSIGNED,
+    allowNull: false,
+    defaultValue: 0.0,
+
   },
   stock: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    defaultValue: 0
   },
   rating: {
-    type: DataTypes.FLOAT,
-    allowNull: false
+    type: DataTypes.DOUBLE.UNSIGNED,
+    allowNull: false,
+    defaultValue: 0.0,
   },
   currency: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    defaultValue: "USD"
   },
   categoryId: {
     type: DataTypes.INTEGER,
