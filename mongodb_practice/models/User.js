@@ -16,10 +16,21 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      validate: {
+        validator: function (v) {
+          return v.includes("@");
+        },
+        message: "Invalid email format",
+      },
     },
     isActive: {
       type: Boolean,
       default: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
   },
   { timestamps: true },

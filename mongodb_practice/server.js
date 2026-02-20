@@ -41,9 +41,30 @@ app.put("/users/:id", async (req, res) => {
   }
 });
 
+app.put("/users/deactivate/:id", async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      {
+        new: true,
+        runValidators: true,
+      },
+    );
+    res.json(updatedUser);
+  } catch (err) {
+    res.status(404).json({ error: err.message });
+  }
+});
+
 app.delete("/users/:id", async (req, res) => {
   await User.findByIdAndDelete(req.params.id);
   res.json({ message: "User deleted" });
+});
+
+app.get("/users/active", async (req, res) => {
+  const activeUsers = await User.find({ isActive: true });
+  res.json(activeUsers);
 });
 
 app.listen(3000, () => console.log("Server running on port 3000"));
