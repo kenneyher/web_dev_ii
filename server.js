@@ -1,6 +1,7 @@
 const express = require("express");
+const { isPrimary } = require("node:cluster");
 const fs = require("node:fs");
-const { Sequelize } = require("sequelize");
+const { Sequelize, DataTypes } = require("sequelize");
 
 const app = express();
 const PORT = 9000;
@@ -46,6 +47,83 @@ class MySQLDatabase extends IDatabase {
   constructor(sequelizeInstance) {
     super();
     this.sequelize = sequelizeInstance;
+    this.#initializeModels();
+  }
+
+  #initializeModels() {
+    console.log("Database synchronized");
+
+    const Category = this.sequelize.define("Category", {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+    });
+
+    const Subcategory = this.sequelize.define("Subcategory", {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      categoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Categories",
+          key: "id",
+        },
+      },
+    });
+
+    const Product = this.sequelize.define("Product", {
+      name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      price: {
+        type: DataTypes.DOUBLE.UNSIGNED,
+        allowNull: false,
+        defaultValue: 0.0,
+      },
+      stock: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      rating: {
+        type: DataTypes.DOUBLE.UNSIGNED,
+        allowNull: false,
+        defaultValue: 0.0,
+      },
+      currency: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "USD",
+      },
+      subcategoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Subcategories",
+          key: "id",
+        },
+      },
+    });
+
+    Product.belongsTo(Subcategory, {
+      foreignKey: "subcategoryId",
+    });
+    Subcategory.belongsTo(Category, {
+      foreignKey: "categoryId",
+    });
+    Category.hasMany(Subcategory, {
+      foreignKey: "categoryId",
+    });
+    Subcategory.hasMany(Product, {
+      foreignKey: "subcategoryId",
+    });
+
+    this.sequelize.sync({ alter: true });
   }
 
   read() {
@@ -73,7 +151,7 @@ class JSONDatabase extends IDatabase {
   }
 }
 
-const conn = new Sequelize("products_db", "root", "root", {
+const conn = new Sequelize("product_inventory", "root", "root", {
   host: "localhost",
   dialect: "mysql",
 });
