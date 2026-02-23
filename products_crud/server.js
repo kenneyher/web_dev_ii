@@ -1,5 +1,4 @@
 const express = require("express");
-const { isPrimary } = require("node:cluster");
 const fs = require("node:fs");
 const { Sequelize, DataTypes, Op } = require("sequelize");
 
